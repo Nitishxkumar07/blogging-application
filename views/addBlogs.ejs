@@ -3,30 +3,77 @@
 
 <head>
     <%- include('./partial/head') %>
-        <title>home</title>
+    <title>Add New Blog</title>
+    <style>
+        /* Custom enhancements on top of Bootstrap */
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .form-container {
+            max-width: 700px;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-top: 50px;
+            margin-bottom: 50px;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .form-control {
+            border-radius: 8px;
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+            border-color: #86b7fe;
+        }
+        textarea.form-control {
+            height: 180px !important;
+        }
+    </style>
 </head>
 
 <body>
 
     <%- include('./partial/Navbsr') %>
-        <div class="container">
+
+    <div class="container d-flex justify-content-center">
+        <div class="form-container w-100">
+            <h2 class="fw-bold mb-4 text-dark text-center">Create a New Blog Post</h2>
+            
             <form method="post" action="/blog" enctype="multipart/form-data">
+                <!-- Cover Image Upload -->
                 <div class="mb-3">
-                    <label for="coverImage" class="form-label">Upload Image</label>
-                    <input type="file" name="coverImage" class="form-control" id="title">
+                    <label for="coverImage" class="form-label">Upload Cover Image</label>
+                    <input type="file" name="coverImage" class="form-control" id="coverImage" accept="image/*" required>
                 </div>
+
+                <!-- Title Input -->
                 <div class="mb-3">
-                    <label for="title" class="form-label">Title</label>
-                    <input type="text" name="title" class="form-control" id="title">
+                    <label for="title" class="form-label">Blog Title</label>
+                    <input type="text" name="title" class="form-control" id="title" placeholder="Enter a catchy title..." required>
                 </div>
-                <div class="form-floating mb-3">
-                    <textarea class="form-control" name="body" id="body" aria-label="With textarea"></textarea>
-                    <label for="floatingTextarea">Body</label>
+
+                <!-- Body Textarea -->
+                <div class="mb-4">
+                    <label for="body" class="form-label">Blog Body</label>
+                    <textarea class="form-control" name="body" id="body" placeholder="Write your blog content here..." required></textarea>
                 </div>
-                <div><button type="submit" class="btn btn-primary">Submit</button></div>
+
+                <!-- Submit Button -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary py-2 fw-semibold fs-5">Publish Blog</button>
+                </div>
             </form>
         </div>
-        <%- include('./partial/script') %>
+    </div>
+
+    <%- include('./partial/script') %>
 </body>
 
 </html>
