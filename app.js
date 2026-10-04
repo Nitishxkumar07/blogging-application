@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from "express";
 import path from "node:path";
 import mongoose from "mongoose";
@@ -9,7 +10,7 @@ import { User } from "./models/user.js"; // Importing registers the model
 import { Blog } from "./models/blog.js";
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URL || "mongodb://127.0.0.1:27017/blogging")
+mongoose.connect(process.env.MONGO_URL)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log("MongoDB connection error:", err));
 
