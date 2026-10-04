@@ -1,45 +1,141 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary bg-dark border-bottom border-body " data-bs-theme="dark">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">Blogging</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary sticky-top shadow-sm">
+  <div class="container">
+    <!-- Brand / Logo -->
+    <a class="navbar-brand fw-bold fs-4 d-flex align-items-center gap-2" href="/">
+      <span class="bg-primary text-white rounded px-2 py-1 fs-6">B</span> Blogging
+    </a>
+
+    <!-- Mobile Toggle Button -->
+    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
       aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNavDropdown">
-      <ul class="navbar-nav">
+
+    <!-- Navbar Links -->
+    <div class="collapse navbar-collapse justify-content-end" id="navbarNavDropdown">
+      <ul class="navbar-nav align-items-lg-center gap-lg-2">
+        
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="/">Home</a>
+          <a class="nav-link px-3 rounded" aria-current="page" href="/">Home</a>
         </li>
+
         <% if (locals.user) { %>
           <li class="nav-item">
-            <a class="nav-link" href="/blog/add-new">Add Blogs</a>
+            <a class="nav-link px-3 rounded" href="/blog/add-new">Add Blogs</a>
           </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-              aria-expanded="false">
-              Nitish Kumar
+          
+          <!-- Logged-In User Dropdown with Avatar -->
+          <li class="nav-item dropdown ms-lg-2">
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 px-3 py-1 rounded user-dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <!-- Show user's profile image (falls back gracefully if coverImageURL is used) -->
+              <img src="<%= locals.user.profileImageURL || locals.user.coverImageURL || 'https://via.placeholder.com/40' %>" 
+                   alt="Profile" 
+                   width="32" 
+                   height="32" 
+                   class="rounded-circle object-fit-cover border border-light shadow-sm">
+              <span class="fw-semibold text-light"><%= locals.user.fullName %></span>
             </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="/user/logout">Log Out</a></li>
+            
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 py-2">
+              <li><a class="dropdown-item py-2 text-danger fw-semibold" href="/user/logout">Log Out</a></li>
             </ul>
           </li>
-          <% } else { %>
+
+        <% } else { %>
            <li class="nav-item">
-            <a class="nav-link" href="/user/signup">Create Account</a>
+            <a class="nav-link px-3 rounded" href="/user/signup">Create Account</a>
            </li>
-           <li class="nav-item">
-            <a class="nav-link" href="/user/signin">Signin</a>
+           <li class="nav-item ms-lg-1">
+            <a class="btn btn-outline-light btn-sm px-3 py-2 rounded-pill fw-semibold" href="/user/signin">Sign In</a>
            </li>
-           <% } %>
+        <% } %>
+
       </ul>
     </div>
   </div>
 </nav>
 
+<!-- Error Flash Message -->
 <% if (locals.error) { %>
-  <div class="container mt-6">
-    <div class="alert alert-danger" role="alert">
-      <%= locals.error %>
+  <div class="container mt-4 animate-alert">
+    <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <div><%= locals.error %></div>
     </div>
   </div>
-  <% } %>
+<% } %>
+
+<style>
+  /* Premium Navbar Styling & Animations */
+  .navbar {
+    background-color: #121619 !important;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+  }
+  
+  .navbar-nav .nav-link {
+    font-weight: 500;
+    color: #adb5bd !important;
+    transition: all 0.2s ease-in-out;
+    border-radius: 6px;
+  }
+
+  .navbar-nav .nav-link:hover, 
+  .navbar-nav .nav-link.active {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+
+  /* Smooth Dropdown Animation */
+  .dropdown-menu {
+    animation: dropdownFade 0.25s ease-in-out forwards;
+    transform-origin: top;
+    background-color: #1a1f24;
+  }
+
+  .dropdown-item {
+    color: #ced4da;
+    transition: background-color 0.15s ease;
+  }
+
+  .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+  }
+
+  .dropdown-item.text-danger:hover {
+    background-color: rgba(220, 53, 69, 0.15);
+    color: #ff6b6b !important;
+  }
+
+  @keyframes dropdownFade {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Alert Animation */
+  @keyframes alertFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-alert {
+    animation: alertFadeIn 0.4s ease-out forwards;
+  }
+  
+  .user-dropdown-toggle::after {
+    margin-left: 0.5rem;
+  }
+</style>
