@@ -32,7 +32,7 @@ export const upload = multer({ storage });
 // View Single Blog & Comments
 router.get("/:id", async (req, res) => {
   const blog = await Blog.findById(req.params.id).populate("createdBy");
-  
+
   // Find all comments associated with this blog ID and populate commenter info
   const comments = await Comment.find({ blogid: req.params.id }).populate("createdBy");
 
@@ -47,7 +47,7 @@ router.get("/:id", async (req, res) => {
 router.post("/comment/:blogid", async (req, res) => {
   await Comment.create({
     content: req.body.content,
-    blogId: req.params.blogid, // Ensure this matches your Comment schema field name (blogId or blogid)
+    blogid: req.params.blogid, // ✅ Changed blogId to blogid
     createdBy: req.user._id,
   });
   return res.redirect(`/blog/${req.params.blogid}`);
@@ -63,4 +63,65 @@ router.post("/", upload.single("coverImage"), async (req, res) => {
     coverImageURL: `/uploads/${req.file.filename}`
   });
   return res.redirect(`/blog/${blog._id}`);
+});
+
+router.get("/edit/:id", async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.id);
+    if (!blog) {
+      return res.status(404).send("Blog not found");
+    }
+    // Render your edit form view and pass the blog data to it
+    res.render("edit", { blog });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server Error");
+  }
+});
+
+router.put("/:id", upload.single("coverImage"), async (req, res) => {
+  try {
+    const { title, body } = req.body;
+
+    // Build the update object
+    const updateData = { title, body };
+
+    // If a new file is uploaded, update the coverImageURL path
+    if (req.file) {
+      updateData.coverImageURL = `/uploads/${req.file.filename}`;
+    }
+
+    const updatedBlog = await Blog.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedBlog) {
+      return res.status(404).send("Blog not found");
+    }
+
+    return res.redirect(`/blog/${updatedBlog._id}`);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Server Error");
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const deletedBlog = await Blog.findByIdAndDelete(req.params.id);
+
+    if (!deletedBlog) {
+      return res.status(404).send("Blog not found");
+    }
+
+    // Optional: You can also write file system code here using `fs.unlink` 
+    // to delete the physical image file from the /uploads folder if needed.
+
+    return res.redirect("/");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Server Error");
+  }
 });
