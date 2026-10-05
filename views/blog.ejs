@@ -3,120 +3,154 @@
 
 <head>
     <%- include('./partial/head') %>
-    <title><%= blog.title %></title>
-    <style>
-        /* Custom enhancements on top of Bootstrap */
-        body {
-            background-color: #f8f9fa;
-            color: #333;
-        }
-        .blog-container {
-            max-width: 850px;
-            background: #ffffff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        }
-        .author-section img {
-            object-fit: cover;
-            border: 2px solid #0d6efd;
-        }
-        .cover-image {
-            max-height: 450px;
-            object-fit: cover;
-            width: 100%;
-        }
-        .blog-body {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            color: #444;
-            background-color: #fdfdfd;
-            border: 1px solid #eaeaea;
-            border-radius: 8px;
-            padding: 20px;
-            white-space: pre-wrap;
-            word-break: break-word;
-            font-family: inherit;
-        }
-        .comment-card {
-            background-color: #fdfdfd;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            transition: all 0.2s ease-in-out;
-        }
-        .comment-card:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        }
-        .comment-avatar {
-            object-fit: cover;
-        }
-        .comment-form-container {
-            background: #f8f9fa;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 20px;
-        }
-    </style>
+        <title>
+            <%= blog.title %>
+        </title>
+        <style>
+            /* Custom enhancements on top of Bootstrap */
+            body {
+                background-color: #f8f9fa;
+                color: #333;
+            }
+
+            .blog-container {
+                max-width: 850px;
+                background: #ffffff;
+                padding: 40px;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+                position: relative; /* Required for absolute positioning of top-right buttons */
+            }
+
+            .author-section img {
+                object-fit: cover;
+                border: 2px solid #0d6efd;
+            }
+
+            .cover-image {
+                max-height: 450px;
+                object-fit: cover;
+                width: 100%;
+            }
+
+            .blog-body {
+                font-size: 1.1rem;
+                line-height: 1.8;
+                color: #444;
+                background-color: #fdfdfd;
+                border: 1px solid #eaeaea;
+                border-radius: 8px;
+                padding: 20px;
+                white-space: pre-wrap;
+                word-break: break-word;
+                font-family: inherit;
+            }
+
+            .comment-card {
+                background-color: #fdfdfd;
+                border: 1px solid #eee;
+                border-radius: 8px;
+                transition: all 0.2s ease-in-out;
+            }
+
+            .comment-card:hover {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            }
+
+            .comment-avatar {
+                object-fit: cover;
+            }
+
+            .comment-form-container {
+                background: #f8f9fa;
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                padding: 20px;
+            }
+        </style>
 </head>
 
 <body>
     <%- include('./partial/Navbsr') %>
 
-    <div class="container my-5">
-        <div class="blog-container mx-auto">
-            
-            <!-- Author Info -->
-            <div class="d-flex align-items-center justify-content-center mb-4 author-section">
-                <img src="<%= blog.createdBy.profileImageURL %>" width="50px" height="50px" class="rounded-circle me-2 shadow-sm" alt="Author Profile">
-                <span class="fw-bold fs-5 text-secondary"><%= blog.createdBy.fullName %></span>
-            </div>
+        <div class="container my-5">
+            <div class="blog-container mx-auto">
 
-            <!-- Blog Title & Cover -->
-            <h1 class="fw-bold mb-4 text-center text-dark"><%= blog.title %></h1>
-            <img src="<%= blog.coverImageURL %>" alt="Cover Image" class="img-fluid rounded cover-image shadow-sm mb-4">
-            
-            <!-- Blog Body Content -->
-            <pre class="blog-body mb-5"><%= blog.body %></pre>
-
-            <hr class="my-5 text-muted">
-
-            <!-- Comments Section -->
-            <div class="comments-section">
-                <h3 class="fw-bold mb-4">Comments <span class="text-muted fs-5">(<%= comments.length %>)</span></h3>
-
-                <!-- Show Comment Input Form ONLY if User is Logged In -->
-                <% if (locals.user) { %>
-                    <div class="comment-form-container mb-4">
-                        <form method="post" action="/blog/comment/<%= blog._id %>">
-                            <div class="mb-3">
-                                <label for="content" class="form-label fw-semibold text-muted">Add to the discussion</label>
-                                <textarea name="content" placeholder="Write your comment here..." class="form-control" id="content" rows="3" required></textarea>
-                                <button class="btn btn-primary mt-3 px-4 fw-semibold" type="submit">Post Comment</button>
-                            </div>
-                        </form>
-                    </div>
-                <% } %>
-
-                <!-- Render All Comments -->
-                <div class="mt-4">
-                    <% comments.forEach(comment => { %>
-                        <div class="comment-card d-flex align-items-start mb-3 p-3">
-                            <img src="<%= comment.createdBy.profileImageURL %>" width="45px" height="45px" class="rounded-circle comment-avatar me-3 shadow-sm" alt="User Profile">
-                            <div class="flex-grow-1">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <strong class="text-dark"><%= comment.createdBy.fullName %></strong>
-                                </div>
-                                <p class="mb-0 text-secondary"><%= comment.content %></p>
-                            </div>
-                        </div>
-                    <% }) %>
+                <!-- Top-Right Corner Action Buttons -->
+                <div class="position-absolute top-0 end-0 p-4 d-flex gap-2 align-items-center">
+                    <a href="/blog/edit/<%= blog._id %>" class="btn btn-sm btn-warning fw-semibold px-3">Edit</a>
+                    <form action="/blog/<%= blog._id %>?_method=DELETE" method="POST" class="d-inline m-0"
+                        onsubmit="return confirm('Are you sure you want to delete this blog?');">
+                        <button type="submit" class="btn btn-sm btn-danger fw-semibold px-3">Delete</button>
+                    </form>
                 </div>
+
+                <!-- Author Info -->
+                <div class="d-flex align-items-center justify-content-center mb-4 author-section">
+                    <img src="<%= blog.createdBy.profileImageURL %>" width="50px" height="50px"
+                        class="rounded-circle me-2 shadow-sm" alt="Author Profile">
+                    <span class="fw-bold fs-5 text-secondary">
+                        <%= blog.createdBy.fullName %>
+                    </span>
+                </div>
+
+                <!-- Blog Title & Cover -->
+                <h1 class="fw-bold mb-4 text-center text-dark">
+                    <%= blog.title %>
+                </h1>
+                <img src="<%= blog.coverImageURL %>" alt="Cover Image"
+                    class="img-fluid rounded cover-image shadow-sm mb-4">
+
+                <!-- Blog Body Content -->
+                <pre class="blog-body mb-5"><%= blog.body %></pre>
+
+                <hr class="my-5 text-muted">
+
+                <!-- Comments Section -->
+                <div class="comments-section">
+                    <h3 class="fw-bold mb-4">Comments <span class="text-muted fs-5">(<%= comments.length %>)</span></h3>
+
+                    <!-- Show Comment Input Form ONLY if User is Logged In -->
+                    <% if (locals.user) { %>
+                        <div class="comment-form-container mb-4">
+                            <form method="post" action="/blog/comment/<%= blog._id %>">
+                                <div class="mb-3">
+                                    <label for="content" class="form-label fw-semibold text-muted">Add to the
+                                        comment</label>
+                                    <textarea name="content" placeholder="Write your comment here..."
+                                        class="form-control" id="content" rows="3" required></textarea>
+                                    <button class="btn btn-primary mt-3 px-4 fw-semibold" type="submit">Post
+                                        Comment</button>
+                                </div>
+                            </form>
+                        </div>
+                    <% } %>
+
+                    <!-- Render All Comments -->
+                    <div class="mt-4">
+                        <% comments.forEach(comment => { %>
+                            <div class="comment-card d-flex align-items-start mb-3 p-3">
+                                <img src="<%= comment.createdBy.profileImageURL %>" width="45px" height="45px"
+                                    class="rounded-circle comment-avatar me-3 shadow-sm" alt="User Profile">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="text-dark">
+                                            <%= comment.createdBy.fullName %>
+                                        </strong>
+                                    </div>
+                                    <p class="mb-0 text-secondary">
+                                        <%= comment.content %>
+                                    </p>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+
             </div>
-
         </div>
-    </div>
 
-    <%- include('./partial/script') %>
+        <%- include('./partial/script') %>
 </body>
 
 </html>
