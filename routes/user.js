@@ -25,19 +25,19 @@ router.post("/signin", async (req, res) => {
 });
 
 router.post("/signup", async (req, res) => {
-    const { fullName, email, password } = req.body;
+    const { fullName, email, password } = req.body || {};
 
     try {
-        await User.create({
-            fullName,
-            email,
-            password,
-        });
+        await User.create({ fullName, email, password });
         return res.redirect("/user/signin");
     } catch (error) {
-        return res.render("signup", {
-            error: "Failed to create account. Email may already exist.",
-        });
+        console.error("SIGNUP ERROR:", error);          // <-- shows the real cause in logs
+
+        let message = "Failed to create account. Please try again.";
+        if (error.code === 11000) message = "An account with this email already exists.";
+        else if (error.name === "ValidationError") message = Object.values(error.errors).map(e => e.message).join(", ");
+
+        return res.render("signup", { error: message });
     }
 });
 
