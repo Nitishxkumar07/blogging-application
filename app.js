@@ -8,7 +8,6 @@ import { router as userRouter } from "./routes/user.js";
 import { router as userBlog } from "./routes/blogs.js";
 import { checkForAuthenticationCookie } from "./middleware/authentication.js";
 import { User } from "./models/user.js";
-import methodOverride from "method-override" // Importing registers the model
 import { Blog } from "./models/blog.js";
 
 // Connect to MongoDB
