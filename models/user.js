@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import { createHmac, randomBytes } from "crypto";
-import { error } from "console";
 import { createTokenForUser } from "../services/authentication.js";
 
 const userSchema = new mongoose.Schema({
@@ -33,17 +32,18 @@ const userSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-// Do NOT pass `next`. Just use an async function and return/finish execution.
-userSchema.pre("save", function () {
+userSchema.pre("save", function (next) {
     const user = this;
 
-    if (!user.isModified("password")) return;
+    if (!user.isModified("password")) return next();
 
     const salt = randomBytes(16).toString();
     const hashedPassword = createHmac('sha256', salt).update(user.password).digest("hex");
 
     this.salt = salt;
     this.password = hashedPassword;
+
+    return next();
 });
 
 userSchema.static("matchpasswordAndGenerateTokens", async function (email, password) {
