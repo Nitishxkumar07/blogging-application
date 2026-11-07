@@ -34,6 +34,7 @@
         }
         textarea.form-control {
             height: 180px !important;
+            resize: vertical;
         }
     </style>
 </head>
@@ -46,12 +47,32 @@
         <div class="form-container w-100">
             <h2 class="fw-bold mb-4 text-dark text-center">Create a New Blog Post</h2>
             
-          <form action="/blog" method="POST" enctype="multipart/form-data">
-  <input type="text" name="title" placeholder="Title" required>
-  <textarea name="body" placeholder="Write your blog..." required></textarea>
-  <input type="file" name="coverImage" accept="image/*" required>
-  <button type="submit">Publish</button>
-</form>
+            <form action="/blog" method="POST" enctype="multipart/form-data">
+                
+                <!-- Title Field -->
+                <div class="mb-3">
+                    <label for="title" class="form-label">Blog Title</label>
+                    <input type="text" class="form-control form-control-lg" id="title" name="title" placeholder="Enter an engaging title..." required>
+                </div>
+
+                <!-- Cover Image Field -->
+                <div class="mb-3">
+                    <label for="coverImage" class="form-label">Cover Image</label>
+                    <input type="file" class="form-control" id="coverImage" name="coverImage" accept="image/*" required>
+                </div>
+
+                <!-- Body / Content Field -->
+                <div class="mb-4">
+                    <label for="body" class="form-label">Blog Content</label>
+                    <textarea class="form-control" id="body" name="body" placeholder="Write your blog content here..." required></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg fw-semibold">Publish Blog</button>
+                </div>
+
+            </form>
         </div>
     </div>
 

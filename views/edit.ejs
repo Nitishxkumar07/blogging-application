@@ -4,34 +4,81 @@
 <head>
     <%- include('./partial/head') %>
     <title>Edit Blog - Blogs</title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+        }
+
+        .edit-container {
+            max-width: 750px;
+        }
+
+        .current-cover {
+            width: 100%;
+            max-height: 220px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+    </style>
 </head>
 
 <body>
 
     <%- include('./partial/Navbsr') %>
 
-    <div class="container mt-5 mb-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
+    <div class="container mt-5 mb-5 edit-container">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-body p-4 p-md-5">
                 
-                <!-- Card Container -->
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-4">
-                        
-                        <h2 class="mb-4 text-center fw-bold">Edit Blog Post</h2>
+                <h2 class="mb-4 text-center fw-bold text-dark">Edit Blog Post</h2>
 
-                        <form action="/blog/<%= blog._id %>?_method=PUT" method="POST" enctype="multipart/form-data">
-  <input type="text" name="title" value="<%= blog.title %>" required>
-  <textarea name="body" required><%= blog.body %></textarea>
-
-  <img src="<%= blog.coverImageURL %>" alt="Current cover" width="200">
-  <label>Replace cover (optional)</label>
-  <input type="file" name="coverImage" accept="image/*">
-  <button type="submit">Save changes</button>
-</form>
-
+                <form action="/blog/<%= blog._id %>?_method=PUT" method="POST" enctype="multipart/form-data">
+                    
+                    <!-- Title Input -->
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Blog Title</label>
+                        <input type="text" class="form-control form-control-lg" id="title" name="title" value="<%= blog.title %>" required>
                     </div>
-                </div>
+
+                    <!-- Current Cover Image Preview -->
+                    <div class="mb-3">
+                        <label class="form-label d-block">Current Cover Image</label>
+                        <div class="mb-2">
+                            <img src="<%= blog.coverImageURL %>" alt="Current cover" class="current-cover shadow-sm">
+                        </div>
+                    </div>
+
+                    <!-- Replace Cover Image Input -->
+                    <div class="mb-3">
+                        <label for="coverImage" class="form-label">Replace Cover Image <span class="text-muted fw-normal fs-6">(Optional)</span></label>
+                        <input type="file" class="form-control" id="coverImage" name="coverImage" accept="image/*">
+                    </div>
+
+                    <!-- Body Content -->
+                    <div class="mb-4">
+                        <label for="body" class="form-label">Blog Content</label>
+                        <textarea class="form-control" id="body" name="body" required><%= blog.body %></textarea>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 justify-content-end">
+                        <a href="/blog/<%= blog._id %>" class="btn btn-secondary px-4 fw-semibold">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">Save Changes</button>
+                    </div>
+
+                </form>
 
             </div>
         </div>

@@ -5,7 +5,7 @@ const secret = process.env.JWT_SECRET || "tan_tana_tan_tantan_tara";
 export function createTokenForUser(user) {
     const payload = {
         _id: user._id,
-        fullName: user.fullName, // Added fullName for navbar display
+        fullName: user.fullName, 
         email: user.email,
         profileImageURL: user.profileImageURL,
         role: user.role,
