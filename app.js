@@ -23,7 +23,10 @@ app.set("view engine", "ejs");
 app.set("views", path.resolve("./views"));
 
 // Middlewares
+// Note: express.urlencoded only handles application/x-www-form-urlencoded.
+// multipart/form-data (file uploads) is handled per-route by multer.
 app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 app.use(cookieParser());
 app.use(checkForAuthenticationCookie("token"));
 app.use(express.static(path.resolve('./public')))
