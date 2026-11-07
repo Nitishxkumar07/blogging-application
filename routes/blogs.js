@@ -1,125 +1,142 @@
 import { Router } from "express";
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+import multer from "multer";
 import { Blog } from "../models/blog.js";
 import { Comment } from "../models/comment.js";
+import { uploadToCloudinary, deleteFromCloudinary } from "../config/cloudinary.js";
 
 export const router = Router();
 
-router.get("/add-new", (req, res) => {
-  return res.render("addBlogs", {
-    user: req.user,
+/* ---------- Multer: keep the file in memory, validate it ---------- */
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+  fileFilter: (req, file, cb) =>
+    file.mimetype.startsWith("image/")
+      ? cb(null, true)
+      : cb(new Error("Only image files are allowed")),
+});
+
+// wrapper so upload errors (too big, wrong type) give a clean message
+const uploadCover = (req, res, next) =>
+  upload.single("coverImage")(req, res, (err) => {
+    if (err) return res.status(400).send(err.message);
+    next();
   });
-});
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.resolve("./public/uploads");
-    // if (!fs.existsSync(uploadPath)) {
-    //   fs.mkdirSync(uploadPath, { recursive: true });
-    // }
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const fileName = `${Date.now()}-${file.originalname}`;
-    cb(null, fileName);
-  }
-});
+/* ---------- Auth helpers ---------- */
+const requireLogin = (req, res, next) => {
+  if (!req.user) return res.redirect("/user/signin"); // change to your login URL
+  next();
+};
 
-export const upload = multer({ storage });
-
-// View Single Blog & Comments
-router.get("/:id", async (req, res) => {
-  const blog = await Blog.findById(req.params.id).populate("createdBy");
-
-  // Find all comments associated with this blog ID and populate commenter info
-  const comments = await Comment.find({ blogid: req.params.id }).populate("createdBy");
-
-  return res.render("blog", {
-    user: req.user,
-    blog,
-    comments, // Pass plural 'comments'
-  });
-});
-
-// Post a New Comment
-router.post("/comment/:blogid", async (req, res) => {
-  await Comment.create({
-    content: req.body.content,
-    blogid: req.params.blogid, // ✅ Changed blogId to blogid
-    createdBy: req.user._id,
-  });
-  return res.redirect(`/blog/${req.params.blogid}`);
-});
-
-// Create New Blog Post
-router.post("/", upload.single("coverImage"), async (req, res) => {
-  const { title, body } = req.body;
-  const blog = await Blog.create({
-    body,
-    title,
-    createdBy: req.user._id,
-    coverImageURL: `/uploads/${req.file.filename}`
-  });
-  return res.redirect(`/blog/${blog._id}`);
-});
-
-router.get("/edit/:id", async (req, res) => {
+// loads the blog and checks the logged-in user owns it
+const requireOwner = async (req, res, next) => {
   try {
     const blog = await Blog.findById(req.params.id);
-    if (!blog) {
-      return res.status(404).send("Blog not found");
+    if (!blog) return res.status(404).send("Blog not found");
+    if (String(blog.createdBy) !== String(req.user._id)) {
+      return res.status(403).send("You can only change your own blogs");
     }
-    // Render your edit form view and pass the blog data to it
-    res.render("edit", { blog });
+    req.blog = blog;
+    next();
   } catch (err) {
     console.error(err);
     res.status(500).send("Server Error");
   }
+};
+
+/* ---------- Pages ---------- */
+router.get("/add-new", requireLogin, (req, res) => {
+  return res.render("addBlogs", { user: req.user });
 });
 
-router.put("/:id", upload.single("coverImage"), async (req, res) => {
+router.get("/edit/:id", requireLogin, requireOwner, (req, res) => {
+  return res.render("edit", { user: req.user, blog: req.blog });
+});
+
+/* ---------- Create ---------- */
+router.post("/", requireLogin, uploadCover, async (req, res) => {
   try {
     const { title, body } = req.body;
+    if (!req.file) return res.status(400).send("Cover image is required");
 
-    // Build the update object
-    const updateData = { title, body };
+    const result = await uploadToCloudinary(req.file.buffer);
 
-    // If a new file is uploaded, update the coverImageURL path
-    if (req.file) {
-      updateData.coverImageURL = `/uploads/${req.file.filename}`;
-    }
+    const blog = await Blog.create({
+      title,
+      body,
+      createdBy: req.user._id,
+      coverImageURL: result.secure_url,
+      coverImagePublicId: result.public_id,
+    });
 
-    const updatedBlog = await Blog.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedBlog) {
-      return res.status(404).send("Blog not found");
-    }
-
-    return res.redirect(`/blog/${updatedBlog._id}`);
+    return res.redirect(`/blog/${blog._id}`);
   } catch (err) {
     console.error(err);
-    return res.status(500).send("Server Error");
+    return res.status(500).send("Could not create blog");
   }
 });
 
-router.delete("/:id", async (req, res) => {
+/* ---------- Update ---------- */
+router.put("/:id", requireLogin, requireOwner, uploadCover, async (req, res) => {
   try {
-    const deletedBlog = await Blog.findByIdAndDelete(req.params.id);
+    const { title, body } = req.body;
+    const blog = req.blog;
 
-    if (!deletedBlog) {
-      return res.status(404).send("Blog not found");
+    blog.title = title;
+    blog.body = body;
+
+    if (req.file) {
+      const result = await uploadToCloudinary(req.file.buffer);
+      await deleteFromCloudinary(blog.coverImagePublicId); // remove the old one
+      blog.coverImageURL = result.secure_url;
+      blog.coverImagePublicId = result.public_id;
     }
 
-    // Optional: You can also write file system code here using `fs.unlink` 
-    // to delete the physical image file from the /uploads folder if needed.
+    await blog.save();
+    return res.redirect(`/blog/${blog._id}`);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Could not update blog");
+  }
+});
 
+/* ---------- Delete ---------- */
+router.delete("/:id", requireLogin, requireOwner, async (req, res) => {
+  try {
+    await deleteFromCloudinary(req.blog.coverImagePublicId);
+    await Comment.deleteMany({ blogid: req.blog._id });
+    await req.blog.deleteOne();
     return res.redirect("/");
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Could not delete blog");
+  }
+});
+
+/* ---------- Comments ---------- */
+router.post("/comment/:blogid", requireLogin, async (req, res) => {
+  try {
+    await Comment.create({
+      content: req.body.content,
+      blogid: req.params.blogid,
+      createdBy: req.user._id,
+    });
+    return res.redirect(`/blog/${req.params.blogid}`);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Could not post comment");
+  }
+});
+
+/* ---------- View single blog (keep LAST, it matches any /:id) ---------- */
+router.get("/:id", async (req, res) => {
+  try {
+    const blog = await Blog.findById(req.params.id).populate("createdBy");
+    if (!blog) return res.status(404).send("Blog not found");
+
+    const comments = await Comment.find({ blogid: req.params.id }).populate("createdBy");
+    return res.render("blog", { user: req.user, blog, comments });
   } catch (err) {
     console.error(err);
     return res.status(500).send("Server Error");

@@ -21,42 +21,14 @@
                         <h2 class="mb-4 text-center fw-bold">Edit Blog Post</h2>
 
                         <form action="/blog/<%= blog._id %>?_method=PUT" method="POST" enctype="multipart/form-data">
-                            
-                            <!-- Title Field -->
-                            <div class="mb-3">
-                                <label for="title" class="form-label fw-semibold">Title</label>
-                                <input type="text" class="form-control" id="title" name="title" value="<%= blog.title %>" required>
-                            </div>
+  <input type="text" name="title" value="<%= blog.title %>" required>
+  <textarea name="body" required><%= blog.body %></textarea>
 
-                            <!-- Body Field -->
-                            <div class="mb-3">
-                                <label for="body" class="form-label fw-semibold">Body</label>
-                                <textarea class="form-control" id="body" name="body" rows="6" required><%= blog.body %></textarea>
-                            </div>
-
-                            <!-- Current Image Preview (Optional enhancement) -->
-                            <% if (blog.coverImageURL) { %>
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">Current Cover Image</label>
-                                    <div>
-                                        <img src="<%= blog.coverImageURL %>" alt="Current Cover" class="img-thumbnail rounded" style="max-height: 150px;">
-                                    </div>
-                                </div>
-                            <% } %>
-
-                            <!-- Cover Image Upload Field -->
-                            <div class="mb-4">
-                                <label for="coverImage" class="form-label fw-semibold">Change Cover Image (Optional)</label>
-                                <input type="file" class="form-control" id="coverImage" name="coverImage">
-                            </div>
-
-                            <!-- Action Buttons -->
-                            <div class="d-flex justify-content-between align-items-center">
-                                <a href="/blog/<%= blog._id %>" class="btn btn-outline-secondary">Cancel</a>
-                                <button type="submit" class="btn btn-primary px-4">Update Blog</button>
-                            </div>
-
-                        </form>
+  <img src="<%= blog.coverImageURL %>" alt="Current cover" width="200">
+  <label>Replace cover (optional)</label>
+  <input type="file" name="coverImage" accept="image/*">
+  <button type="submit">Save changes</button>
+</form>
 
                     </div>
                 </div>
