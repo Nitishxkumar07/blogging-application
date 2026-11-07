@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from "express";
 import path from "node:path";
+import methodOverride from "method-override";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import { router as userRouter } from "./routes/user.js";
