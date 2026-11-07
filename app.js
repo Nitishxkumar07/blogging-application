@@ -8,7 +8,6 @@ import { router as userRouter } from "./routes/user.js";
 import { router as userBlog } from "./routes/blogs.js";
 import { checkForAuthenticationCookie } from "./middleware/authentication.js";
 import { User } from "./models/user.js";
-import methodOverride from "method-override" // Importing registers the model
 import { Blog } from "./models/blog.js";
 
 // Connect to MongoDB
@@ -31,7 +30,9 @@ app.use(express.static(path.resolve('./public')))
 app.use(methodOverride('_method'));
 // Routes
 app.get("/",async (req, res) => {
-    const allBlogs = await Blog.find({});
+    const allBlogs = await Blog.find().sort({
+      createdAt: -1,
+    });
     return res.render("home", {
         user: req.user,
         blogs: allBlogs
